@@ -7,5 +7,28 @@ app.listen(process.env.PORT || 3000, () => {
 });
 
 app.get('/', (req, res) => {
-  res.end('Hello World');
+  if (req.payload) {
+    console.log(req.payload);
+    res.end(req.payload);
+  } else {
+    res.end('Homepage with no payload')
+  }
 });
+
+app.get('/hooks', (req, res) => {
+  if (req.payload) {
+    console.log(req.payload);
+    res.end(req.payload);
+  } else {
+    res.end('Hooks page with no payload');
+  }
+})
+
+app.post('/hooks', (req, res) => {
+  if (req.payload) {
+    console.log(req.payload);
+    res.end(req.payload);
+  } else {
+    res.end('Hooks page with no payload');
+  }
+})
