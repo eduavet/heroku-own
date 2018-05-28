@@ -43,19 +43,24 @@ app.get('/access', (req, res) => {
   const redirect = 'http://localhost:3000/access';
   const { code } = req.query;
   // return res.end(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`)
-  console.log(code);
-  console.log(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`);
+  // console.log(code);
+  // console.log(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`);
   fetch(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`, {
     method: 'POST',
     headers: {
-      'Accept': 'application/xml'
+      'Accept': 'application/json'
     }
   })
     .then(token => {
-      console.log(typeof token);
-      console.log(token);
+      if (typeof token === 'object') {
+        res.end(JSON.stringify())
+      } else {
+        res.end(token)
+      }
+      // console.log(typeof token);
+      // console.log(token);
       // console.log(util.inspect(token, { showHidden: true, depth: null }));
-      return token
+      // return token
     })
     // .then(token => res.json(token))
     .catch(console.error);
