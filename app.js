@@ -40,7 +40,7 @@ app.post('/hooks', (req, res) => {
 app.get('/access', (req, res) => {
   const client = '41e60573e31f48af0084';
   const secret = 'f3e5ec6ea357c57c4d0c1a9cb875c109ebbcc49a';
-  const redirect = 'http://localhost:3000/access';
+  const redirect = 'https://testing-heroku-mut.herokuapp.com/access';
   const { code } = req.query;
   // return res.end(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`)
   // console.log(code);
