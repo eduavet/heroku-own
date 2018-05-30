@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const fetch = require('node-fetch');
 const util = require('util');
+const fs = require('fs');
 
 const { request, GraphQLClient } =  require('graphql-request');
 
@@ -106,10 +107,15 @@ app.post('/receive', (req, res) => {
   client.request(query)
     .then(data => {
       const { text } = data.viewer.repository.object;
+      fs.writeFile("test.txt", "Hey there!", function(err) {
+        if(err) {
+          return console.log(err);
+        }
+        console.log("The file was saved!");
+      });
       console.log(text);
     })
     .catch(console.error)
-  // console.log(req.body);
   res.end();
 })
 
