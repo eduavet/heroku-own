@@ -107,7 +107,7 @@ app.post('/receive', (req, res) => {
   client.request(query)
     .then(data => {
       const { text } = data.viewer.repository.object;
-      fs.writeFile("test.txt", "Hey there!", function(err) {
+      fs.writeFile("text.txt", text, function(err) {
         if(err) {
           return console.log(err);
         }
@@ -120,7 +120,7 @@ app.post('/receive', (req, res) => {
 })
 
 app.get('/content', (req, res) => {
-  fs.readFile('test.txt', 'utf8', function (err,data) {
+  fs.readFile('text.txt', 'utf8', function (err,data) {
     if (err) {
       return console.log(err);
     }
