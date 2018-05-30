@@ -3,9 +3,20 @@ const path = require("path");
 const fetch = require('node-fetch');
 const util = require('util');
 
+const { request, GraphQLClient } =  require('graphql-request');
+
 const app = express();
+const API_URL = 'https://api.github.com/graphql';
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+  next();
+})
 
 app.listen(process.env.PORT || 3000, () => {
   console.log('Listening to port 3000');
@@ -38,13 +49,11 @@ app.post('/hooks', (req, res) => {
 })
 
 app.get('/access', (req, res) => {
-  const client = '41e60573e31f48af0084';
-  const secret = 'f3e5ec6ea357c57c4d0c1a9cb875c109ebbcc49a';
-  const redirect = 'https://testing-heroku-mut.herokuapp.com/access';
+  const client = process.env.CLIENT;
+  const secret = process.env.SECRET;
+  const redirect = 'http://localhost:3000/access';
   const { code } = req.query;
-  // return res.end(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`)
-  // console.log(code);
-  // console.log(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`);
+
   fetch(`https://github.com/login/oauth/access_token?client_id=${client}&client_secret=${secret}&code=${code}`, {
     method: 'POST',
     headers: {
@@ -52,18 +61,28 @@ app.get('/access', (req, res) => {
     }
   })
     .then(token => {
-      if (typeof token === 'object') {
-        res.end(JSON.stringify())
-      } else {
-        res.end(token)
-      }
-      // console.log(typeof token);
-      // console.log(token);
-      // console.log(util.inspect(token, { showHidden: true, depth: null }));
-      // return token
+      token.buffer()
+        .then(response => {
+          console.log(JSON.parse(response.toString()).access_token);
+          getRepos(JSON.parse(response.toString()).access_token, res);
+        })
+        .catch(console.error);
     })
-    // .then(token => res.json(token))
     .catch(console.error);
+})
+
+app.get('/loggedin', (req, res) => {
+  const client = process.env.CLIENT;
+  const secret = process.env.SECRET;
+  const token = process.env.TOKEN;
+
+  getRepos(token, res);
+})
+
+app.post('/receive', (req, res) => {
+  console.log('received ping');
+  console.log(req.payload);
+  res.end();
 })
 
 app.get('/finish', (req, res) => {
@@ -73,3 +92,47 @@ app.get('/finish', (req, res) => {
 app.get('/github-logo.png', (req, res) => {
   res.sendFile(path.join(__dirname+'/github-logo.png'))
 })
+
+const getRepos = (accessToken, res) => {
+  const client = new GraphQLClient(API_URL, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  let output = ``;
+
+  const fetchPages = (code) => {
+    const query = `{
+      viewer {
+        repositories(first: 30${code ? `, after: "${code}"` : '' }, affiliations: OWNER) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          edges {
+            node {
+              name
+              id
+            }
+          }
+        }
+      }
+    }`;
+
+    client.request(query)
+      .then(data => {
+        const { edges } = data.viewer.repositories;
+        const { hasNextPage } = data.viewer.repositories.pageInfo;
+        edges.forEach(edge => output += `${JSON.stringify(edge.node)}\n`);
+        if (!hasNextPage) {
+          res.end(output);
+        } else {
+          fetchPages(data.viewer.repositories.pageInfo.endCursor)
+        }
+      })
+      .catch(console.error)
+  }
+
+  return fetchPages();
+}
