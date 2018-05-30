@@ -81,7 +81,9 @@ app.get('/loggedin', (req, res) => {
 
 app.post('/receive', (req, res) => {
   console.log('received ping');
-  console.log(res);
+  console.log(res.body);
+  console.log('----------');
+  console.log(req.body);
   res.end();
 })
 
