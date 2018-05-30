@@ -119,6 +119,15 @@ app.post('/receive', (req, res) => {
   res.end();
 })
 
+app.get('/content', (req, res) => {
+  fs.readFile('test.txt', 'utf8', function (err,data) {
+    if (err) {
+      return console.log(err);
+    }
+    res.end(data);
+  });
+})
+
 app.get('/finish', (req, res) => {
   res.end(JSON.stringify(req.query));
 })
