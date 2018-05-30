@@ -88,30 +88,27 @@ app.post('/receive', (req, res) => {
     },
   })
 
-  let output = ``;
-
-  const fetchPages = (code) => {
-    const query = `{
-      viewer {
-        repository(name: "empty-repo-3") {
-              id
-              name
-              object(expression: "master:README.md") {
-              id
-              ... on Blob {
-                text
-              }
+  const query = `{
+    viewer {
+      repository(name: "empty-repo-3") {
+            id
+            name
+            object(expression: "master:README.md") {
+            id
+            ... on Blob {
+              text
             }
-        }
+          }
       }
-    }`;
+    }
+  }`;
 
-    client.request(query)
-      .then(data => {
-        const { text } = data.viewer.repository.object;
-        console.log(text);
-      })
-      .catch(console.error)
+  client.request(query)
+    .then(data => {
+      const { text } = data.viewer.repository.object;
+      console.log(text);
+    })
+    .catch(console.error)
   // console.log(req.body);
   res.end();
 })
