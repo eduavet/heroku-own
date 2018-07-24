@@ -82,6 +82,8 @@ app.get('/loggedin', (req, res) => {
 
 app.post('/receive', (req, res) => {
   console.log('received ping');
+  console.log(req.auth);
+  console.log(req);
 
   const client = new GraphQLClient(API_URL, {
     headers: {
